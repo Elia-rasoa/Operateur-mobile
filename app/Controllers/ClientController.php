@@ -78,8 +78,9 @@ class ClientController extends BaseController
 
         return redirect()->to('/client/dashboard')->with('success', 'Dépôt de ' . number_format($montant, 2, ',', ' ') . ' Ar effectué avec succès !');
     }
+
     /**
-     * GESTION DES RETRAITS (Avec Frais)
+     * GESTION DES RETRAITS
      */
     public function retrait()
     {
@@ -95,74 +96,191 @@ class ClientController extends BaseController
         $client = $clientModel->find($clientId);
 
         try {
-            $tarification = $this->getTarification('retrait', $montant);
+            $tarificationRetrait = $this->getTarification('retrait', $montant);
         } catch (\RuntimeException $e) {
             return redirect()->back()->with('error', $e->getMessage());
         }
+        
+        $fraisRetraitTheoriques = $tarificationRetrait['frais'];
 
-        $frais = $tarification['frais'];
-        $totalA_Deduire = $montant + $frais;
+        $transactionModel = new TransactionModel();
+        $baremeModel = new BaremeModel();
+        $typeOpTransfert = $baremeModel->getTypeOperationId('transfert');
+
+        // Correction critique : On cherche le dernier transfert reçu pour ce montant EXACT
+        // ET qui possède notre marqueur spécial de gratuité (99999)
+        $transfertRecu = $transactionModel->where('client_destination_id', $clientId)
+                                          ->where('type_op_id', $typeOpTransfert)
+                                          ->where('montant', $montant)
+                                          ->where('frais_appliques', 99999)
+                                          ->orderBy('id', 'DESC')
+                                          ->first();
+
+        $resultatFrais = $this->resolveRetraitFees($fraisRetraitTheoriques, $transfertRecu);
+        $fraisAppliques = $resultatFrais['frais_appliques'];
+        $dejaPayeParExpediteur = $resultatFrais['deja_paye_par_expediteur'];
+
+        $totalA_Deduire = $montant + $fraisAppliques;
 
         if ($client['solde'] < $totalA_Deduire) {
-            return redirect()->back()->with('error', 'Solde insuffisant. Le retrait de ' . number_format($montant, 2, ',', ' ') . ' Ar nécessite ' . number_format($frais, 2, ',', ' ') . ' Ar de frais (Total: ' . number_format($totalA_Deduire, 2, ',', ' ') . ' Ar).');
+            return redirect()->back()->with('error', 'Solde insuffisant. Requis : ' . number_format($totalA_Deduire, 2, ',', ' ') . ' Ar.');
         }
 
         $nouveauSolde = $client['solde'] - $totalA_Deduire;
         $clientModel->update($clientId, ['solde' => $nouveauSolde]);
-        $this->saveTransaction($clientId, 'retrait', $montant, $frais);
+        
+        $this->saveTransaction($clientId, 'retrait', $montant, $fraisAppliques);
 
-        return redirect()->to('/client/dashboard#nav-retrait')->with('success', 'Retrait effectué. Montant : ' . number_format($montant, 2, ',', ' ') . ' Ar (Frais : ' . number_format($frais, 2, ',', ' ') . ' Ar).');
+        if ($dejaPayeParExpediteur) {
+            // On consomme le marqueur pour ne pas pouvoir réutiliser le retrait gratuit
+            $transactionModel->update($transfertRecu['id'], ['frais_appliques' => 0]);
+
+            return redirect()->to('/client/dashboard#nav-retrait')->with('success', 'Retrait effectué. Montant : ' . number_format($montant, 2, ',', ' ') . ' Ar. (Frais : 0 Ar - Offerts par l\'expéditeur !)');
+        }
+
+        return redirect()->to('/client/dashboard#nav-retrait')->with('success', 'Retrait effectué. Montant : ' . number_format($montant, 2, ',', ' ') . ' Ar (Frais : ' . number_format($fraisAppliques, 2, ',', ' ') . ' Ar).');
     }
 
     /**
-     * GESTION DES TRANSFERTS (Avec Frais)
+     * GESTION DES TRANSFERTS
      */
     public function transfert()
     {
         $session = session();
         $clientId = $session->get('client_id');
-        $telephoneDestinataire = $this->request->getPost('telephone_destinataire');
-        $montant = floatval($this->request->getPost('montant'));
+        
+        $chaineDestinataires = $this->request->getPost('telephone_destinataire');
+        $montantSaisi = floatval($this->request->getPost('montant'));
+        $inclureFraisRetrait = in_array($this->request->getPost('inclure_frais_retrait'), ['1', 'on', 'true'], true);
 
-        if ($montant < 100) {
-            return redirect()->back()->with('error', 'Le montant minimum pour un transfert est de 100 Ar.');
+        if ($montantSaisi < 100) {
+            return redirect()->back()->with('error', 'Le montant minimum pour une transaction est de 100 Ar.');
         }
 
         $clientModel = new ClientModel();
         $expediteur = $clientModel->find($clientId);
+        $telephoneExpediteur = $expediteur['numero_telephone'] ?? $expediteur['telephone'] ?? '';
 
-        if (($expediteur['numero_telephone'] ?? $expediteur['telephone'] ?? '') === $telephoneDestinataire) {
-            return redirect()->back()->with('error', 'Vous ne pouvez pas effectuer un transfert vers votre propre numéro.');
+        $numerosTableau = explode(',', $chaineDestinataires);
+        $destinatairesNumeros = array_filter(array_map('trim', $numerosTableau));
+        $nombreDestinataires = count($destinatairesNumeros);
+
+        if ($nombreDestinataires === 0) {
+            return redirect()->back()->with('error', 'Veuillez spécifier au moins un numéro de destinataire.');
+        }
+
+        $montantParPersonne = $montantSaisi / $nombreDestinataires;
+        if ($montantParPersonne < 100) {
+            return redirect()->back()->with('error', 'Le montant après division est inférieur au minimum requis (100 Ar par personne).');
         }
 
         $prefixModel = new PrefixModel();
-        if (!$prefixModel->isPrefixAllowed($telephoneDestinataire)) {
-            return redirect()->back()->with('error', 'Le numéro du destinataire n\'est pas couvert par un préfixe autorisé.');
+        $prefixeEmetteur = substr($telephoneExpediteur, 0, 3);
+
+        $destinatairesValibles = [];
+        $totalFraisTransfertGlobal = 0.0;
+        $totalFraisRetraitGlobal = 0.0;
+
+        foreach ($destinatairesNumeros as $numero) {
+            if ($numero === $telephoneExpediteur) {
+                return redirect()->back()->with('error', 'Transaction annulée : Vous ne pouvez pas faire un transfert vers votre propre numéro.');
+            }
+
+            if (!$prefixModel->isPrefixAllowed($numero)) {
+                return redirect()->back()->with('error', 'Transaction annulée : Le numéro ' . $numero . ' possède un préfixe non supporté.');
+            }
+
+            $prefixeDestinataire = substr($numero, 0, 3);
+            $memeOperateur = ($prefixeEmetteur === $prefixeDestinataire);
+
+            if ($nombreDestinataires > 1 && !$memeOperateur) {
+                return redirect()->back()->with('error', 'Transaction annulée : L\'envoi multiple est restreint au même opérateur.');
+            }
+
+            try {
+                $tarificationTransfert = $this->getTarification('transfert', $montantParPersonne);
+                $fraisTransfert = $tarificationTransfert['frais'];
+            } catch (\RuntimeException $e) {
+                return redirect()->back()->with('error', 'Erreur barème transfert : ' . $e->getMessage());
+            }
+
+            $totalFraisTransfertGlobal += $fraisTransfert;
+
+            $fraisRetraitOfferts = 0.0;
+            if ($inclureFraisRetrait && $memeOperateur) {
+                try {
+                    $tarificationRetrait = $this->getTarification('retrait', $montantParPersonne);
+                    $fraisRetraitOfferts = $tarificationRetrait['frais'];
+                } catch (\RuntimeException $e) {
+                    return redirect()->back()->with('error', 'Erreur barème retrait : ' . $e->getMessage());
+                }
+            }
+
+            $totalFraisRetraitGlobal += $fraisRetraitOfferts;
+
+            $destinataire = $clientModel->findByTelephone($numero);
+            if (!$destinataire) {
+                $destinataire = $clientModel->getOrCreateByTelephone($numero);
+            }
+
+            $montantCreditDestinataire = $this->computeRecipientCreditAmount($montantParPersonne, $fraisRetraitOfferts, $inclureFraisRetrait && $memeOperateur);
+
+            $destinatairesValibles[] = [
+                'record' => $destinataire,
+                'montant_brut' => $montantParPersonne,
+                'frais_transfert' => $fraisTransfert,
+                'frais_retrait_inclus' => $fraisRetraitOfferts,
+                'montant_total_recu' => $montantCreditDestinataire,
+            ];
         }
 
-        $destinataire = $clientModel->findByTelephone($telephoneDestinataire);
-        if (!$destinataire) {
-            $destinataire = $clientModel->getOrCreateByTelephone($telephoneDestinataire);
+        $coutTotalExpediteur = $montantSaisi + $totalFraisTransfertGlobal + $totalFraisRetraitGlobal;
+
+        if ($expediteur['solde'] < $coutTotalExpediteur) {
+            return redirect()->back()->with('error', 'Solde insuffisant.');
         }
 
-        try {
-            $tarification = $this->getTarification('transfert', $montant);
-        } catch (\RuntimeException $e) {
-            return redirect()->back()->with('error', $e->getMessage());
+        // Débit exact de l'expéditeur
+        $clientModel->update($expediteur['id'], ['solde' => $expediteur['solde'] - $coutTotalExpediteur]);
+
+        // Crédit exact du destinataire
+        foreach ($destinatairesValibles as $cible) {
+            $clientModel->update($cible['record']['id'], [
+                'solde' => $cible['record']['solde'] + $cible['montant_total_recu']
+            ]);
+
+            // Correction critique : Si l'option est cochée, on insère la valeur distinctive 99999
+            $fraisMarquage = ($inclureFraisRetrait && $memeOperateur) ? 99999 : $cible['frais_transfert'];
+
+            $this->saveTransaction($expediteur['id'], 'transfert', $cible['montant_brut'], $fraisMarquage, $cible['record']['id']);
         }
 
-        $frais = $tarification['frais'];
-        $totalA_Deduire = $montant + $frais;
+        return redirect()->to('/client/dashboard#nav-transfert')->with('success', 'Transfert effectué avec succès !');
+    }
 
-        if ($expediteur['solde'] < $totalA_Deduire) {
-            return redirect()->back()->with('error', 'Solde insuffisant. Il vous faut au moins ' . number_format($totalA_Deduire, 2, ',', ' ') . ' Ar (dont ' . number_format($frais, 2, ',', ' ') . ' Ar de frais).');
+    public function resolveRetraitFees(float $fraisRetraitTheoriques, ?array $transfertRecu): array
+    {
+        // Si on trouve un transfert lié avec la valeur 99999, c'est que les frais sont prépayés !
+        if ($transfertRecu && floatval($transfertRecu['frais_appliques']) === 99999.0) {
+            return [
+                'frais_appliques' => 0.0,
+                'deja_paye_par_expediteur' => true,
+            ];
         }
 
-        $clientModel->update($expediteur['id'], ['solde' => $expediteur['solde'] - $totalA_Deduire]);
-        $clientModel->update($destinataire['id'], ['solde' => $destinataire['solde'] + $montant]);
-        $this->saveTransaction($expediteur['id'], 'transfert', $montant, $frais, $destinataire['id']);
+        return [
+            'frais_appliques' => (float) $fraisRetraitTheoriques,
+            'deja_paye_par_expediteur' => false,
+        ];
+    }
 
-        return redirect()->to('/client/dashboard#nav-transfert')->with('success', 'Transfert envoyé à ' . $telephoneDestinataire . '. Montant : ' . number_format($montant, 2, ',', ' ') . ' Ar (Frais : ' . number_format($frais, 2, ',', ' ') . ' Ar).');
+    public function computeRecipientCreditAmount(float $montantBrut, float $fraisRetraitOfferts, bool $inclureFraisRetrait): float
+    {
+        if ($inclureFraisRetrait) {
+            return $montantBrut + $fraisRetraitOfferts;
+        }
+
+        return $montantBrut;
     }
 
     private function getTarification(string $operationName, float $montant): array
@@ -171,7 +289,7 @@ class ClientController extends BaseController
         $bareme = $baremeModel->getBaremeForOperation($operationName, $montant);
 
         if (!$bareme) {
-            throw new \RuntimeException('Aucun barème n\'est défini pour cette opération à ce montant.');
+            throw new \RuntimeException('Aucun barème trouvé.');
         }
 
         return [

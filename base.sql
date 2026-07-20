@@ -75,3 +75,6 @@ INSERT INTO baremes (type_op_id, montant_min, montant_max, frais) VALUES
 (2, 250001, 500000, 1500),
 (2, 500001, 1000000, 2500),
 (2, 1000001, 2000000, 3000);
+
+-- 0331234567
+-- 0334455566
