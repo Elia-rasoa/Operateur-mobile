@@ -14,8 +14,9 @@
             <a class="navbar-brand fw-bold" href="#">Mobile Money Client</a>
             <div class="d-flex align-items-center">
                 <span class="navbar-text text-white me-3 d-none d-sm-inline">
-                    En ligne : <strong><?= esc($client['numero_telephone']) ?></strong>
+                    En ligne : <strong><?= esc($client['numero_telephone'] ?? $client['telephone'] ?? '-') ?></strong>
                 </span>
+                <a href="<?= base_url('/client/historique') ?>" class="btn btn-sm btn-outline-light me-2">Historique</a>
                 <a href="<?= base_url('/login/logout') ?>" class="btn btn-sm btn-outline-light">Déconnexion</a>
             </div>
         </div>

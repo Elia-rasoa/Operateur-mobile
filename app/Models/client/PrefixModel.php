@@ -12,4 +12,10 @@ class PrefixModel extends Model
     protected $useTimestamps = false;
 
     protected $allowedFields = ['code'];
+
+    public function isPrefixAllowed(string $telephone): bool
+    {
+        $prefix = substr($telephone, 0, 3);
+        return (bool) $this->where('code', $prefix)->first();
+    }
 }

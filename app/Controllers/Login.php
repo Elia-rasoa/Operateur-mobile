@@ -20,29 +20,19 @@ class Login extends BaseController
     {
         $phone = $this->request->getPost('telephone');
 
-        // 1. Extraction et vérification du préfixe
-        $prefixCode = substr($phone, 0, 3);
         $prefixModel = new PrefixModel();
-        $prefixExiste = $prefixModel->where('code', $prefixCode)->first();
-
-        if (!$prefixExiste) {
+        if (!$prefixModel->isPrefixAllowed($phone)) {
             return redirect()->to('/')->with('error', 'Opérateur non supporté ou préfixe invalide.');
         }
 
-        // 2. Récupération ou création automatique du client
         $clientModel = new ClientModel();
-        $client = $clientModel->where('numero_telephone', $phone)->first();
+        $client = $clientModel->findByTelephone($phone);
 
         if (!$client) {
-            // Le modèle va intercepter cette insertion et ajouter le 'created_at' automatiquement !
-            $newClientData = [
-                'numero_telephone' => $phone,
-                'solde'            => 0.0
-            ];
-            $clientId = $clientModel->insert($newClientData);
-        } else {
-            $clientId = $client['id'];
+            $client = $clientModel->getOrCreateByTelephone($phone);
         }
+
+        $clientId = $client['id'];
 
         // 3. Stockage en session
         $session = session();

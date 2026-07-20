@@ -35,6 +35,10 @@
                     <button type="submit" class="btn btn-primary btn-lg w-100 fw-medium shadow-sm">
                         Se connecter
                     </button>
+
+                    <a href="<?= base_url('/admin') ?>" class="btn btn-outline-secondary btn-lg w-100 fw-medium mt-3">
+                        Basculer vers admin
+                    </a>
                 </form>
             </div>
         </div>
