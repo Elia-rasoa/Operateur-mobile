@@ -5,7 +5,7 @@ namespace App\Controllers;
 use App\Models\BaremeModel;
 use App\Models\TransactionModel;
 use App\Models\client\ClientModel;
-use App\Models\client\PrefixModel;
+use App\Models\client\TransactionModel;
 
 class ClientController extends BaseController
 {
@@ -76,6 +76,16 @@ class ClientController extends BaseController
         $clientModel->update($clientId, ['solde' => $nouveauSolde]);
         $this->saveTransaction($clientId, 'depot', $montant, 0.0);
 
+        // Enregistrement de la transaction
+        $transactionModel = new TransactionModel();
+        $transactionModel->insert([
+            'client_source_id'      => $clientId,
+            'client_destination_id' => null,
+            'type_op_id'            => 1, // depot
+            'montant'               => $montant,
+            'frais_appliques'       => 0,
+        ]);
+
         return redirect()->to('/client/dashboard')->with('success', 'Dépôt de ' . number_format($montant, 2, ',', ' ') . ' Ar effectué avec succès !');
     }
     /**
@@ -111,7 +121,17 @@ class ClientController extends BaseController
         $clientModel->update($clientId, ['solde' => $nouveauSolde]);
         $this->saveTransaction($clientId, 'retrait', $montant, $frais);
 
-        return redirect()->to('/client/dashboard#nav-retrait')->with('success', 'Retrait effectué. Montant : ' . number_format($montant, 2, ',', ' ') . ' Ar (Frais : ' . number_format($frais, 2, ',', ' ') . ' Ar).');
+        // Enregistrement de la transaction
+        $transactionModel = new TransactionModel();
+        $transactionModel->insert([
+            'client_source_id'      => $clientId,
+            'client_destination_id' => null,
+            'type_op_id'            => 2, // retrait
+            'montant'               => $montant,
+            'frais_appliques'       => $frais,
+        ]);
+
+        return redirect()->to('/client/dashboard')->with('success', 'Retrait effectué. Montant : ' . number_format($montant, 2, ',', ' ') . ' Ar (Frais : ' . number_format($frais, 2, ',', ' ') . ' Ar).');
     }
 
     /**
@@ -162,32 +182,15 @@ class ClientController extends BaseController
         $clientModel->update($destinataire['id'], ['solde' => $destinataire['solde'] + $montant]);
         $this->saveTransaction($expediteur['id'], 'transfert', $montant, $frais, $destinataire['id']);
 
-        return redirect()->to('/client/dashboard#nav-transfert')->with('success', 'Transfert envoyé à ' . $telephoneDestinataire . '. Montant : ' . number_format($montant, 2, ',', ' ') . ' Ar (Frais : ' . number_format($frais, 2, ',', ' ') . ' Ar).');
-    }
-
-    private function getTarification(string $operationName, float $montant): array
-    {
-        $baremeModel = new BaremeModel();
-        $bareme = $baremeModel->getBaremeForOperation($operationName, $montant);
-
-        if (!$bareme) {
-            throw new \RuntimeException('Aucun barème n\'est défini pour cette opération à ce montant.');
-        }
-
-        return [
-            'frais' => (float) $bareme['frais'],
-            'type_op_id' => $baremeModel->getTypeOperationId($operationName),
-        ];
-    }
-
-    private function saveTransaction(int $clientId, string $operationName, float $montant, float $frais, ?int $destinationClientId = null): void
-    {
-        $baremeModel = new BaremeModel();
-        $typeOpId = $baremeModel->getTypeOperationId($operationName);
-
-        if ($typeOpId === null) {
-            return;
-        }
+        // Enregistrement de la transaction
+        $transactionModel = new TransactionModel();
+        $transactionModel->insert([
+            'client_source_id'      => $expediteur['id'],
+            'client_destination_id' => $destinataire['id'],
+            'type_op_id'            => 3, // transfert
+            'montant'               => $montant,
+            'frais_appliques'       => $frais,
+        ]);
 
         $transactionModel = new TransactionModel();
         $transactionModel->insert([
