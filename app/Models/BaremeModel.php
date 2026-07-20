@@ -17,4 +17,24 @@ class BaremeModel extends Model
                     ->join('types_operation', 'types_operation.id = baremes.type_op_id')
                     ->findAll();
     }
+
+    // Récupère tous les types d'opération
+    public function getTypesOperation()
+    {
+        $db = \Config\Database::connect();
+        $builder = $db->table('types_operation');
+        return $builder->get()->getResultArray();
+    }
+
+    // Ajouter une nouvelle tranche de barème
+    public function addBareme($data)
+    {
+        return $this->insert($data);
+    }
+
+    // Supprimer une tranche de barème
+    public function deleteBareme($id)
+    {
+        return $this->delete($id);
+    }
 }

@@ -12,7 +12,7 @@ class ClientModel extends Model
     protected $returnType       = 'array';
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
-    protected $allowedFields    = [];
+    protected $allowedFields    = ['telephone', 'nom', 'solde'];
 
     protected bool $allowEmptyInserts = false;
     protected bool $updateOnlyChanged = true;
@@ -20,20 +20,17 @@ class ClientModel extends Model
     protected array $casts = [];
     protected array $castHandlers = [];
 
-    // Dates
     protected $useTimestamps = false;
     protected $dateFormat    = 'datetime';
     protected $createdField  = 'created_at';
     protected $updatedField  = 'updated_at';
     protected $deletedField  = 'deleted_at';
 
-    // Validation
     protected $validationRules      = [];
     protected $validationMessages   = [];
     protected $skipValidation       = false;
     protected $cleanValidationRules = true;
 
-    // Callbacks
     protected $allowCallbacks = true;
     protected $beforeInsert   = [];
     protected $afterInsert    = [];
@@ -43,4 +40,22 @@ class ClientModel extends Model
     protected $afterFind      = [];
     protected $beforeDelete   = [];
     protected $afterDelete    = [];
+
+    // Récupère tous les clients avec leur solde
+    public function getAllWithSolde()
+    {
+        return $this->orderBy('id', 'DESC')->findAll();
+    }
+
+    // Récupère les transactions d'un client avec les détails
+    public function getClientTransactions($client_id)
+    {
+        $db = \Config\Database::connect();
+        $builder = $db->table('transactions t');
+        $builder->select('t.*, tp.nom as type_nom');
+        $builder->join('types_operation tp', 'tp.id = t.type_op_id', 'left');
+        $builder->where('t.client_id', $client_id);
+        $builder->orderBy('t.date_transaction', 'DESC');
+        return $builder->get()->getResultArray();
+    }
 }

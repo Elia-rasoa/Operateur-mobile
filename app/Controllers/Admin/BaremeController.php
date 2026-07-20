@@ -11,6 +11,7 @@ class BaremeController extends BaseController
     {
         $model = new BaremeModel();
         $data['baremes'] = $model->getBaremesWithTypes();
+        $data['types_operation'] = $model->getTypesOperation();
         return view('admin/baremes/index', $data);
     }
 
@@ -18,8 +19,30 @@ class BaremeController extends BaseController
     {
         $model = new BaremeModel();
         $model->update($id, [
-            'frais' => $this->request->getPost('frais')
+            'type_op_id'   => $this->request->getPost('type_op_id'),
+            'montant_min'  => $this->request->getPost('montant_min'),
+            'montant_max'  => $this->request->getPost('montant_max'),
+            'frais'        => $this->request->getPost('frais'),
         ]);
-        return redirect()->to('/admin/baremes')->with('message', 'Frais mis à jour avec succès !');
+        return redirect()->to('/admin/baremes')->with('message', 'Barème mis à jour avec succès !');
+    }
+
+    public function add()
+    {
+        $model = new BaremeModel();
+        $model->addBareme([
+            'type_op_id'   => $this->request->getPost('type_op_id'),
+            'montant_min'  => $this->request->getPost('montant_min'),
+            'montant_max'  => $this->request->getPost('montant_max'),
+            'frais'        => $this->request->getPost('frais'),
+        ]);
+        return redirect()->to('/admin/baremes')->with('message', 'Nouveau barème ajouté avec succès !');
+    }
+
+    public function delete($id)
+    {
+        $model = new BaremeModel();
+        $model->deleteBareme($id);
+        return redirect()->to('/admin/baremes')->with('message', 'Barème supprimé avec succès !');
     }
 }
