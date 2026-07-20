@@ -16,3 +16,6 @@ $routes->get('/client/dashboard', 'ClientController::index');
 $routes->post('/client/transaction/depot', 'ClientController::depot');
 $routes->post('/client/transaction/retrait', 'ClientController::retrait');
 $routes->post('/client/transaction/transfert', 'ClientController::transfert');
+
+// Administration - Historique des transactions
+$routes->get('/admin/clients', 'AdminController::historique');
