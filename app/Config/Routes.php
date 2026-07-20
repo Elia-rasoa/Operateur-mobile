@@ -12,6 +12,7 @@ $routes->get('/login/logout', 'Login::logout');
 
 // Redirection vers le futur espace client
 $routes->get('/client/dashboard', 'ClientController::index');
+$routes->get('/client/historique', 'ClientController::historique');
 
 $routes->post('/client/transaction/depot', 'ClientController::depot');
 $routes->post('/client/transaction/retrait', 'ClientController::retrait');

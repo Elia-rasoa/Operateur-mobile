@@ -14,18 +14,25 @@ class ClientSeeder extends Seeder
         // Création de clients fictifs pour les tests avec toutes les données requises
         $dataClients = [
             [
-                'numero_telephone' => '0331122334', 
-                'solde'            => 50000.0, 
+                'numero_telephone' => '0331122334',
+                'solde'            => 50000.0,
                 'created_at'       => $now
             ],
             [
-                'numero_telephone' => '0374455667', 
-                'solde'            => 120000.0, 
+                'numero_telephone' => '0374455667',
+                'solde'            => 120000.0,
                 'created_at'       => $now
             ],
         ];
 
-        // Insertion groupée sécurisée
-        $this->db->table('clients')->insertBatch($dataClients);
+        foreach ($dataClients as $client) {
+            $exists = $this->db->table('clients')
+                ->where('numero_telephone', $client['numero_telephone'])
+                ->countAllResults();
+
+            if ($exists === 0) {
+                $this->db->table('clients')->insert($client);
+            }
+        }
     }
 }

@@ -2,6 +2,8 @@
 
 namespace App\Controllers;
 
+use App\Models\BaremeModel;
+use App\Models\TransactionModel;
 use App\Models\client\ClientModel;
 use App\Models\client\TransactionModel;
 
@@ -10,28 +12,51 @@ class ClientController extends BaseController
     public function index()
     {
         $session = session();
-        
-        // Sécurité : Si le client n'est pas connecté, retour au login
+
         if (!$session->has('client_id')) {
             return redirect()->to('/')->with('error', 'Veuillez vous connecter pour accéder au tableau de bord.');
         }
 
-        // Récupération des données fraîches du client (surtout le solde)
         $clientModel = new ClientModel();
         $clientData = $clientModel->find($session->get('client_id'));
 
-        // Si par hasard le client n'existe plus en base, on détruit la session
         if (!$clientData) {
             $session->destroy();
             return redirect()->to('/')->with('error', 'Compte introuvable.');
         }
 
-        // Préparation des données pour la vue
+        $transactionModel = new TransactionModel();
         $data = [
-            'client' => $clientData
+            'client' => $clientData,
+            'transactions' => $transactionModel->getTransactionsByClient($session->get('client_id')),
         ];
 
         return view('client/dashboard', $data);
+    }
+
+    public function historique()
+    {
+        $session = session();
+
+        if (!$session->has('client_id')) {
+            return redirect()->to('/')->with('error', 'Veuillez vous connecter pour consulter votre historique.');
+        }
+
+        $clientModel = new ClientModel();
+        $clientData = $clientModel->find($session->get('client_id'));
+
+        if (!$clientData) {
+            $session->destroy();
+            return redirect()->to('/')->with('error', 'Compte introuvable.');
+        }
+
+        $transactionModel = new TransactionModel();
+        $data = [
+            'client' => $clientData,
+            'transactions' => $transactionModel->getTransactionsByClient($session->get('client_id')),
+        ];
+
+        return view('client/historique', $data);
     }
 
     public function depot()
@@ -45,12 +70,11 @@ class ClientController extends BaseController
         }
 
         $clientModel = new ClientModel();
-        
-        // On récupère le solde actuel et on l'incrémente
         $client = $clientModel->find($clientId);
         $nouveauSolde = $client['solde'] + $montant;
 
         $clientModel->update($clientId, ['solde' => $nouveauSolde]);
+        $this->saveTransaction($clientId, 'depot', $montant, 0.0);
 
         // Enregistrement de la transaction
         $transactionModel = new TransactionModel();
@@ -80,18 +104,22 @@ class ClientController extends BaseController
         $clientModel = new ClientModel();
         $client = $clientModel->find($clientId);
 
-        // --- CALCUL DES FRAIS DE RETRAIT ---
-        // Option B (Simulation) : Exemple de 2% pour le retrait en attendant la table finale
-        $frais = $montant * 0.02; 
+        try {
+            $tarification = $this->getTarification('retrait', $montant);
+        } catch (\RuntimeException $e) {
+            return redirect()->back()->with('error', $e->getMessage());
+        }
+
+        $frais = $tarification['frais'];
         $totalA_Deduire = $montant + $frais;
 
-        // Vérification si le solde couvre le montant demandé + les frais de retrait
         if ($client['solde'] < $totalA_Deduire) {
             return redirect()->back()->with('error', 'Solde insuffisant. Le retrait de ' . number_format($montant, 2, ',', ' ') . ' Ar nécessite ' . number_format($frais, 2, ',', ' ') . ' Ar de frais (Total: ' . number_format($totalA_Deduire, 2, ',', ' ') . ' Ar).');
         }
 
         $nouveauSolde = $client['solde'] - $totalA_Deduire;
         $clientModel->update($clientId, ['solde' => $nouveauSolde]);
+        $this->saveTransaction($clientId, 'retrait', $montant, $frais);
 
         // Enregistrement de la transaction
         $transactionModel = new TransactionModel();
@@ -123,29 +151,36 @@ class ClientController extends BaseController
         $clientModel = new ClientModel();
         $expediteur = $clientModel->find($clientId);
 
-        if ($expediteur['numero_telephone'] === $telephoneDestinataire) {
+        if (($expediteur['numero_telephone'] ?? $expediteur['telephone'] ?? '') === $telephoneDestinataire) {
             return redirect()->back()->with('error', 'Vous ne pouvez pas effectuer un transfert vers votre propre numéro.');
         }
 
-        $destinataire = $clientModel->where('numero_telephone', $telephoneDestinataire)->first();
-        if (!$destinataire) {
-            return redirect()->back()->with('error', 'Le numéro du destinataire n\'existe pas.');
+        $prefixModel = new PrefixModel();
+        if (!$prefixModel->isPrefixAllowed($telephoneDestinataire)) {
+            return redirect()->back()->with('error', 'Le numéro du destinataire n\'est pas couvert par un préfixe autorisé.');
         }
 
-        // --- CALCUL DES FRAIS DE TRANSFERT ---
-        // Option B (Simulation) : Exemple de 1% pour le transfert
-        $frais = $montant * 0.01; 
+        $destinataire = $clientModel->findByTelephone($telephoneDestinataire);
+        if (!$destinataire) {
+            $destinataire = $clientModel->getOrCreateByTelephone($telephoneDestinataire);
+        }
+
+        try {
+            $tarification = $this->getTarification('transfert', $montant);
+        } catch (\RuntimeException $e) {
+            return redirect()->back()->with('error', $e->getMessage());
+        }
+
+        $frais = $tarification['frais'];
         $totalA_Deduire = $montant + $frais;
 
         if ($expediteur['solde'] < $totalA_Deduire) {
             return redirect()->back()->with('error', 'Solde insuffisant. Il vous faut au moins ' . number_format($totalA_Deduire, 2, ',', ' ') . ' Ar (dont ' . number_format($frais, 2, ',', ' ') . ' Ar de frais).');
         }
 
-        // Débit de l'expéditeur (Montant + Frais)
         $clientModel->update($expediteur['id'], ['solde' => $expediteur['solde'] - $totalA_Deduire]);
-        
-        // Crédit du destinataire (Uniquement le montant net initial)
         $clientModel->update($destinataire['id'], ['solde' => $destinataire['solde'] + $montant]);
+        $this->saveTransaction($expediteur['id'], 'transfert', $montant, $frais, $destinataire['id']);
 
         // Enregistrement de la transaction
         $transactionModel = new TransactionModel();
@@ -157,6 +192,13 @@ class ClientController extends BaseController
             'frais_appliques'       => $frais,
         ]);
 
-        return redirect()->to('/client/dashboard')->with('success', 'Transfert envoyé à ' . $telephoneDestinataire . '. Montant : ' . number_format($montant, 2, ',', ' ') . ' Ar (Frais : ' . number_format($frais, 2, ',', ' ') . ' Ar).');
+        $transactionModel = new TransactionModel();
+        $transactionModel->insert([
+            'type_op_id' => $typeOpId,
+            'client_source_id' => $clientId,
+            'client_destination_id' => $destinationClientId,
+            'montant' => $montant,
+            'frais_appliques' => $frais,
+        ]);
     }
 }
