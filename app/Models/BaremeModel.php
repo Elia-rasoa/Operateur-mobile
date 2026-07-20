@@ -8,7 +8,7 @@ class BaremeModel extends Model
 {
     protected $table            = 'baremes';
     protected $primaryKey       = 'id';
-    protected $allowedFields    = ['type_op_id', 'montant_min', 'montant_max', 'frais'];
+    protected $allowedFields    = ['type_op_id', 'montant_min', 'montant_max', 'frais', 'commission_externe_pct'];
 
     // Récupère les barèmes avec le nom du type (dépôt, retrait, etc.)
     public function getBaremesWithTypes()

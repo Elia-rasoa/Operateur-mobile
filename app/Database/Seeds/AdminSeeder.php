@@ -8,37 +8,30 @@ class AdminSeeder extends Seeder
 {
     public function run()
     {
-        // 1. Préfixes
-        $this->db->table('prefixes')->insertBatch([
-            ['code' => '033'],
-            ['code' => '037']
-        ]);
+        // 1. Préfixes (INSERT OR IGNORE pour éviter les doublons)
+        $this->db->query("INSERT OR IGNORE INTO prefixes (code) VALUES ('033')");
+        $this->db->query("INSERT OR IGNORE INTO prefixes (code) VALUES ('037')");
 
         // 2. Types d'opérations
-        $this->db->table('types_operation')->insertBatch([
-            ['nom' => 'depot'],
-            ['nom' => 'retrait'],
-            ['nom' => 'transfert']
-        ]);
+        $this->db->query("INSERT OR IGNORE INTO types_operation (nom) VALUES ('depot')");
+        $this->db->query("INSERT OR IGNORE INTO types_operation (nom) VALUES ('retrait')");
+        $this->db->query("INSERT OR IGNORE INTO types_operation (nom) VALUES ('transfert')");
 
         // 3. Barèmes (Tranches de montants et frais)
-        $this->db->table('baremes')->insertBatch([
-            // Exemples pour Dépôt (ID 1) - Souvent gratuit ou très bas
-            ['type_op_id' => 1, 'montant_min' => 0, 'montant_max' => 1000000, 'frais' => 0],
+        $this->db->query("INSERT OR IGNORE INTO baremes (type_op_id, montant_min, montant_max, frais, commission_externe_pct) VALUES (1, 0, 1000000, 0, 0)");
 
-            // Exemples pour Retrait (ID 2)
-            ['type_op_id' => 2, 'montant_min' => 100, 'montant_max' => 1000, 'frais' => 50],
-            ['type_op_id' => 2, 'montant_min' => 1001, 'montant_max' => 5000, 'frais' => 50],
-            ['type_op_id' => 2, 'montant_min' => 5001, 'montant_max' => 10000, 'frais' => 100],
-            ['type_op_id' => 2, 'montant_min' => 10001, 'montant_max' => 25000, 'frais' => 200],
-            ['type_op_id' => 2, 'montant_min' => 25001, 'montant_max' => 50000, 'frais' => 400],
-            ['type_op_id' => 2, 'montant_min' => 50001, 'montant_max' => 100000, 'frais' => 800],
+        // Retraits (type_op_id = 2)
+        $this->db->query("INSERT OR IGNORE INTO baremes (type_op_id, montant_min, montant_max, frais, commission_externe_pct) VALUES (2, 100, 1000, 50, 0)");
+        $this->db->query("INSERT OR IGNORE INTO baremes (type_op_id, montant_min, montant_max, frais, commission_externe_pct) VALUES (2, 1001, 5000, 50, 0)");
+        $this->db->query("INSERT OR IGNORE INTO baremes (type_op_id, montant_min, montant_max, frais, commission_externe_pct) VALUES (2, 5001, 10000, 100, 0)");
+        $this->db->query("INSERT OR IGNORE INTO baremes (type_op_id, montant_min, montant_max, frais, commission_externe_pct) VALUES (2, 10001, 25000, 200, 0)");
+        $this->db->query("INSERT OR IGNORE INTO baremes (type_op_id, montant_min, montant_max, frais, commission_externe_pct) VALUES (2, 25001, 50000, 400, 0)");
+        $this->db->query("INSERT OR IGNORE INTO baremes (type_op_id, montant_min, montant_max, frais, commission_externe_pct) VALUES (2, 50001, 100000, 800, 0)");
 
-            // Exemples pour Transfert (ID 3) - Généralement plus cher que le retrait
-            ['type_op_id' => 3, 'montant_min' => 100, 'montant_max' => 5000, 'frais' => 100],
-            ['type_op_id' => 3, 'montant_min' => 5001, 'montant_max' => 10000, 'frais' => 200],
-            ['type_op_id' => 3, 'montant_min' => 10001, 'montant_max' => 50000, 'frais' => 500],
-            ['type_op_id' => 3, 'montant_min' => 50001, 'montant_max' => 100000, 'frais' => 1000],
-        ]);
+        // Transferts (type_op_id = 3) - avec commission externe par défaut à 5%
+        $this->db->query("INSERT OR IGNORE INTO baremes (type_op_id, montant_min, montant_max, frais, commission_externe_pct) VALUES (3, 100, 5000, 100, 5)");
+        $this->db->query("INSERT OR IGNORE INTO baremes (type_op_id, montant_min, montant_max, frais, commission_externe_pct) VALUES (3, 5001, 10000, 200, 5)");
+        $this->db->query("INSERT OR IGNORE INTO baremes (type_op_id, montant_min, montant_max, frais, commission_externe_pct) VALUES (3, 10001, 50000, 500, 5)");
+        $this->db->query("INSERT OR IGNORE INTO baremes (type_op_id, montant_min, montant_max, frais, commission_externe_pct) VALUES (3, 50001, 100000, 1000, 5)");
     }
 }

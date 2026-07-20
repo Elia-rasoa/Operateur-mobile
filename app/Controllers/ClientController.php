@@ -56,7 +56,7 @@ class ClientController extends BaseController
             'transactions' => $transactionModel->getTransactionsByClient($session->get('client_id')),
         ];
 
-        return view('client/historique', $data);
+     return view('client/historique', $data);
     }
 
     public function depot()
@@ -78,6 +78,7 @@ class ClientController extends BaseController
 
         return redirect()->to('/client/dashboard')->with('success', 'Dépôt de ' . number_format($montant, 2, ',', ' ') . ' Ar effectué avec succès !');
     }
+
     /**
      * GESTION DES RETRAITS (Avec Frais)
      */
@@ -189,6 +190,20 @@ class ClientController extends BaseController
             return;
         }
 
+        // Déterminer le type de réseau (interne/externe)
+        $typeReseau = 'interne';
+        if ($operationName === 'transfert' && $destinationClientId !== null) {
+            $clientModel = new \App\Models\client\ClientModel();
+            $destinataire = $clientModel->find($destinationClientId);
+            if ($destinataire) {
+                $telDest = $destinataire['numero_telephone'] ?? $destinataire['telephone'] ?? '';
+                $prefixModel = new \App\Models\client\PrefixModel();
+                if ($prefixModel->isExternalOperator($telDest)) {
+                    $typeReseau = 'externe';
+                }
+            }
+        }
+
         $transactionModel = new TransactionModel();
         $transactionModel->insert([
             'type_op_id' => $typeOpId,
@@ -196,6 +211,7 @@ class ClientController extends BaseController
             'client_destination_id' => $destinationClientId,
             'montant' => $montant,
             'frais_appliques' => $frais,
+            'type_reseau' => $typeReseau,
         ]);
     }
 }
