@@ -37,6 +37,7 @@ Module Clients
 Cible : Automatise le calcul des frais et la séparation des gains. Ne détaille pas le visuel, va droit aux chiffres.
 
 ### Taches Elia :
+VERSION 1
 - BDD coté client 
 - login: 
     creation des models : ClientModel.php
@@ -45,3 +46,21 @@ Cible : Automatise le calcul des frais et la séparation des gains. Ne détaille
     ClientController.php
     avec les routes pour : login , dashboard
 - dashboard cote client: affichage du solde , types de transaction (depot , retrait, tranfert)
+-Historique de chaque transaction
+
+VERSION 2
+[ok] Migration de la BDD
+    [ok] Ajouter la colonne retrait_offre (TINYINT/BOOLEAN) dans la table transactions.
+    [ok] Ajouter un index sur (client_destination_id, type_op_id, retrait_offre) pour optimiser la recherche des retraits gratuits.
+[ok] Ajouter 'retrait_offre' dans $allowedFields de TransactionModel.php.
+[ok] Vérifier et unifier les noms de colonnes dans ClientModel.php (numero_telephone vs telephone).
+[ok] Refactorisation du Contrôleur (ClientController.php)
+    [ok] Remplacer les marqueurs temporaires par le flag retrait_offre dans transfert().
+    [ok] Mettre à jour la méthode resolveRetraitFees() pour consommer le ticket gratuit sur le montant exact.
+    [ok] Ajouter la gestion des transactions atomiques ($db->transStart() / $db->transComplete()) sur transfert() et retrait() pour éviter toute incohérence de solde en cas de crash réseau.
+[ok] Validation & Sécurité
+    [ok] Sécuriser les saisies de montants contre les valeurs négatives ou nulles.
+    [ok] Vérifier la cohérence des préfixes lors d'envois multiples.
+Interface utilisateur
+[ok] Afficher un badge "Retrait offert disponible" dans le sous-menu de retrait si le client possède un transfert éligible.
+[ok] Améliorer le récapitulatif avant confirmation de transfert (afficher le détail : Montant envoyé + Frais d'envoi + Frais de retrait offerts).
