@@ -5,7 +5,6 @@ namespace App\Controllers;
 use App\Models\BaremeModel;
 use App\Models\TransactionModel;
 use App\Models\client\ClientModel;
-use App\Models\client\TransactionModel;
 
 class ClientController extends BaseController
 {
@@ -141,28 +140,12 @@ class ClientController extends BaseController
         
         $this->saveTransaction($clientId, 'retrait', $montant, $fraisAppliques);
 
-<<<<<<< ours
         if ($dejaPayeParExpediteur) {
-            // On consomme le marqueur pour ne pas pouvoir réutiliser le retrait gratuit
             $transactionModel->update($transfertRecu['id'], ['frais_appliques' => 0]);
-
             return redirect()->to('/client/dashboard#nav-retrait')->with('success', 'Retrait effectué. Montant : ' . number_format($montant, 2, ',', ' ') . ' Ar. (Frais : 0 Ar - Offerts par l\'expéditeur !)');
         }
 
         return redirect()->to('/client/dashboard#nav-retrait')->with('success', 'Retrait effectué. Montant : ' . number_format($montant, 2, ',', ' ') . ' Ar (Frais : ' . number_format($fraisAppliques, 2, ',', ' ') . ' Ar).');
-=======
-        // Enregistrement de la transaction
-        $transactionModel = new TransactionModel();
-        $transactionModel->insert([
-            'client_source_id'      => $clientId,
-            'client_destination_id' => null,
-            'type_op_id'            => 2, // retrait
-            'montant'               => $montant,
-            'frais_appliques'       => $frais,
-        ]);
-
-        return redirect()->to('/client/dashboard')->with('success', 'Retrait effectué. Montant : ' . number_format($montant, 2, ',', ' ') . ' Ar (Frais : ' . number_format($frais, 2, ',', ' ') . ' Ar).');
->>>>>>> theirs
     }
 
     /**
@@ -304,7 +287,6 @@ class ClientController extends BaseController
             return $montantBrut + $fraisRetraitOfferts;
         }
 
-<<<<<<< ours
         return $montantBrut;
     }
 
@@ -331,6 +313,7 @@ class ClientController extends BaseController
         if ($typeOpId === null) {
             return;
         }
+<<<<<<< Updated upstream
 =======
         // Enregistrement de la transaction
         $transactionModel = new TransactionModel();
@@ -357,6 +340,8 @@ class ClientController extends BaseController
             }
         }
 
+=======
+>>>>>>> Stashed changes
         $transactionModel = new TransactionModel();
         $transactionModel->insert([
             'type_op_id' => $typeOpId,
