@@ -10,14 +10,13 @@ $routes->get('/', 'Login::index');
 $routes->post('/login/authentifier', 'Login::authentifier');
 $routes->get('/login/logout', 'Login::logout');
 
-// Redirection vers le futur espace client
+// Espace client
 $routes->get('/client/dashboard', 'ClientController::index');
 $routes->get('/client/historique', 'ClientController::historique');
 
 $routes->post('/client/transaction/depot', 'ClientController::depot');
 $routes->post('/client/transaction/retrait', 'ClientController::retrait');
 $routes->post('/client/transaction/transfert', 'ClientController::transfert');
-$routes->get('/', 'Home::index');
 
 // Routes Admin (hors groupe pour login/logout)
 $routes->get('admin/login', 'Admin\AuthController::login');
@@ -55,5 +54,4 @@ $routes->group('admin', ['filter' => 'adminAuth'], static function ($routes) {
     $routes->get('clients/historique/(:num)', 'Admin\ClientController::historique/$1');
 });
 
-// Administration - Historique des transactions
-$routes->get('/admin/clients', 'AdminController::historique');
+// (Route déplacée dans le groupe filtré ci-dessus)

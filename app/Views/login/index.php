@@ -36,7 +36,7 @@
                         Se connecter
                     </button>
 
-                    <a href="<?= base_url('/admin') ?>" class="btn btn-outline-secondary btn-lg w-100 fw-medium mt-3">
+                    <a href="<?= base_url('/admin/login') ?>" class="btn btn-outline-secondary btn-lg w-100 fw-medium mt-3">
                         Basculer vers admin
                     </a>
                 </form>
