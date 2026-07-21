@@ -1,5 +1,5 @@
 Taches Alexia :
-
+                version 1
 -BDD en place : La structure SQL est créée et migrée.
 -Seeders configurés :données Admin et Client se chargent automatiquement.
 -Module Baremes :
@@ -23,7 +23,18 @@ Module Clients
 -`app/Views/admin/clients/index.php` - Liste des clients
 -`app/Views/admin/clients/historique.php` - Détail transactions d'un client
 -`app/Config/Routes.php` - Routes clients
-
+                version 2
+-Modif BDD :
+-Prefixes : Ajouter colonne `nom_operateur`.
+-Transactions : Ajouter colonne `type_flux` (interne/externe).
+-Baremes : Ajouter colonne `taux_comm` (pourcentage).
+-Back-end : 
+-Détection : Si préfixes `source` et `dest` diffèrent => `type_flux = 'externe'`.
+-Calcul : `Frais = FraisBase + (Montant * TauxComm)` si externe.
+-Vue Admin :
+-Gains : `SUM(frais)` groupé par `type_flux`.
+-Reversement : Tableau récap : `Opérateur` | `Solde Net` (Collecté - Frais).
+Cible : Automatise le calcul des frais et la séparation des gains. Ne détaille pas le visuel, va droit aux chiffres.
 
 ### Taches Elia :
 - BDD coté client 

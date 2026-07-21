@@ -2,16 +2,15 @@
 
 namespace App\Controllers\Admin;
 
-use App\Controllers\BaseController;
 use App\Models\ClientModel;
 
-class ClientController extends BaseController
+class ClientController extends BaseAdminController
 {
     public function index()
     {
         $model = new ClientModel();
         $data['clients'] = $model->getAllWithSolde();
-        return view('admin/clients/index', $data);
+        return $this->render('admin/clients/index', $data, 'Gestion des Clients');
     }
 
     public function historique($id)
@@ -25,6 +24,6 @@ class ClientController extends BaseController
 
         $data['client'] = $client;
         $data['transactions'] = $model->getClientTransactions($id);
-        return view('admin/clients/historique', $data);
+        return $this->render('admin/clients/historique', $data, 'Historique - ' . ($client['numero_telephone'] ?? $client['telephone'] ?? 'Client'));
     }
 }
