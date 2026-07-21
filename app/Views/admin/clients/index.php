@@ -6,10 +6,12 @@
 <div class="stats-grid">
     <div class="stat-card">
         <div class="stat-label">Total clients</div>
-        <div class="stat-value"><?= $total_clients ?></div>
+        <div class="stat-value"><?= esc($total_clients) ?></div>
+    </div>
     <div class="stat-card">
         <div class="stat-label">Solde total</div>
         <div class="stat-value" style="color:#4361ee;"><?= number_format($solde_total, 0, ',', ' ') ?> FCFA</div>
+    </div>
 </div>
 
 <div class="table-wrapper">

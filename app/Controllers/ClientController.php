@@ -313,20 +313,7 @@ class ClientController extends BaseController
         if ($typeOpId === null) {
             return;
         }
-<<<<<<< Updated upstream
-=======
-        // Enregistrement de la transaction
-        $transactionModel = new TransactionModel();
-        $transactionModel->insert([
-            'client_source_id'      => $expediteur['id'],
-            'client_destination_id' => $destinataire['id'],
-            'type_op_id'            => 3, // transfert
-            'montant'               => $montant,
-            'frais_appliques'       => $frais,
-        ]);
->>>>>>> theirs
 
-        // Déterminer le type de réseau (interne/externe)
         $typeReseau = 'interne';
         if ($operationName === 'transfert' && $destinationClientId !== null) {
             $clientModel = new \App\Models\client\ClientModel();
@@ -340,8 +327,6 @@ class ClientController extends BaseController
             }
         }
 
-=======
->>>>>>> Stashed changes
         $transactionModel = new TransactionModel();
         $transactionModel->insert([
             'type_op_id' => $typeOpId,
