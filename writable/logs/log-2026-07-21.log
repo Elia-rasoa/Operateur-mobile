@@ -349,11 +349,19 @@ in APPPATH/Views/admin/layout.php on line 42.
 11 SYSTEMPATH/Boot.php(68): CodeIgniter\Boot::runCodeIgniter()
 12 FCPATH/index.php(59): CodeIgniter\Boot::bootWeb()
 13 SYSTEMPATH/rewrite.php(44): require_once('/home/alexia-reyas/Documents/Operateur-mobile/public/index.php')
+<<<<<<< HEAD
 CRITICAL - 2026-07-21 05:48:16 --> ErrorException: Undefined array key "icon"
 [Method: GET, Route: admin]
 in APPPATH/Views/admin/layout.php on line 42.
  1 APPPATH/Views/admin/layout.php(42): CodeIgniter\Debug\Exceptions->errorHandler()
  2 SYSTEMPATH/View/View.php(240): include('/home/alexia-reyas/Documents/Operateur-mobile/app/Views/admin/layout.php')
+=======
+CRITICAL - 2026-07-21 05:53:13 --> ErrorException: Undefined array key "icon"
+[Method: GET, Route: admin]
+in APPPATH/Views/admin/layout.php on line 42.
+ 1 APPPATH/Views/admin/layout.php(42): CodeIgniter\Debug\Exceptions->errorHandler()
+ 2 SYSTEMPATH/View/View.php(240): include('/opt/lampp/htdocs/Operateur-mobile/app/Views/admin/layout.php')
+>>>>>>> origin/main
  3 SYSTEMPATH/View/View.php(243): CodeIgniter\View\View->CodeIgniter\View\{closure}()
  4 SYSTEMPATH/Common.php(1250): CodeIgniter\View\View->render()
  5 APPPATH/Controllers/Admin/BaseAdminController.php(18): view()
@@ -364,12 +372,21 @@ in APPPATH/Views/admin/layout.php on line 42.
 10 SYSTEMPATH/Boot.php(417): CodeIgniter\CodeIgniter->run()
 11 SYSTEMPATH/Boot.php(68): CodeIgniter\Boot::runCodeIgniter()
 12 FCPATH/index.php(59): CodeIgniter\Boot::bootWeb()
+<<<<<<< HEAD
 13 SYSTEMPATH/rewrite.php(44): require_once('/home/alexia-reyas/Documents/Operateur-mobile/public/index.php')
 CRITICAL - 2026-07-21 05:48:34 --> ErrorException: Undefined array key "icon"
 [Method: GET, Route: admin]
 in APPPATH/Views/admin/layout.php on line 42.
  1 APPPATH/Views/admin/layout.php(42): CodeIgniter\Debug\Exceptions->errorHandler()
  2 SYSTEMPATH/View/View.php(240): include('/home/alexia-reyas/Documents/Operateur-mobile/app/Views/admin/layout.php')
+=======
+13 SYSTEMPATH/rewrite.php(44): require_once('/opt/lampp/htdocs/Operateur-mobile/public/index.php')
+CRITICAL - 2026-07-21 06:00:22 --> ErrorException: Undefined array key "icon"
+[Method: GET, Route: admin]
+in APPPATH/Views/admin/layout.php on line 42.
+ 1 APPPATH/Views/admin/layout.php(42): CodeIgniter\Debug\Exceptions->errorHandler()
+ 2 SYSTEMPATH/View/View.php(240): include('/opt/lampp/htdocs/Operateur-mobile/app/Views/admin/layout.php')
+>>>>>>> origin/main
  3 SYSTEMPATH/View/View.php(243): CodeIgniter\View\View->CodeIgniter\View\{closure}()
  4 SYSTEMPATH/Common.php(1250): CodeIgniter\View\View->render()
  5 APPPATH/Controllers/Admin/BaseAdminController.php(18): view()
@@ -380,12 +397,21 @@ in APPPATH/Views/admin/layout.php on line 42.
 10 SYSTEMPATH/Boot.php(417): CodeIgniter\CodeIgniter->run()
 11 SYSTEMPATH/Boot.php(68): CodeIgniter\Boot::runCodeIgniter()
 12 FCPATH/index.php(59): CodeIgniter\Boot::bootWeb()
+<<<<<<< HEAD
 13 SYSTEMPATH/rewrite.php(44): require_once('/home/alexia-reyas/Documents/Operateur-mobile/public/index.php')
 CRITICAL - 2026-07-21 05:49:22 --> ErrorException: Undefined array key "icon"
 [Method: GET, Route: admin]
 in APPPATH/Views/admin/layout.php on line 42.
  1 APPPATH/Views/admin/layout.php(42): CodeIgniter\Debug\Exceptions->errorHandler()
  2 SYSTEMPATH/View/View.php(240): include('/home/alexia-reyas/Documents/Operateur-mobile/app/Views/admin/layout.php')
+=======
+13 SYSTEMPATH/rewrite.php(44): require_once('/opt/lampp/htdocs/Operateur-mobile/public/index.php')
+CRITICAL - 2026-07-21 06:01:51 --> ErrorException: Undefined array key "icon"
+[Method: GET, Route: admin]
+in APPPATH/Views/admin/layout.php on line 42.
+ 1 APPPATH/Views/admin/layout.php(42): CodeIgniter\Debug\Exceptions->errorHandler()
+ 2 SYSTEMPATH/View/View.php(240): include('/opt/lampp/htdocs/Operateur-mobile/app/Views/admin/layout.php')
+>>>>>>> origin/main
  3 SYSTEMPATH/View/View.php(243): CodeIgniter\View\View->CodeIgniter\View\{closure}()
  4 SYSTEMPATH/Common.php(1250): CodeIgniter\View\View->render()
  5 APPPATH/Controllers/Admin/BaseAdminController.php(18): view()
@@ -396,12 +422,21 @@ in APPPATH/Views/admin/layout.php on line 42.
 10 SYSTEMPATH/Boot.php(417): CodeIgniter\CodeIgniter->run()
 11 SYSTEMPATH/Boot.php(68): CodeIgniter\Boot::runCodeIgniter()
 12 FCPATH/index.php(59): CodeIgniter\Boot::bootWeb()
+<<<<<<< HEAD
 13 SYSTEMPATH/rewrite.php(44): require_once('/home/alexia-reyas/Documents/Operateur-mobile/public/index.php')
 CRITICAL - 2026-07-21 05:49:35 --> ErrorException: Undefined array key "icon"
 [Method: GET, Route: admin]
 in APPPATH/Views/admin/layout.php on line 42.
  1 APPPATH/Views/admin/layout.php(42): CodeIgniter\Debug\Exceptions->errorHandler()
  2 SYSTEMPATH/View/View.php(240): include('/home/alexia-reyas/Documents/Operateur-mobile/app/Views/admin/layout.php')
+=======
+13 SYSTEMPATH/rewrite.php(44): require_once('/opt/lampp/htdocs/Operateur-mobile/public/index.php')
+CRITICAL - 2026-07-21 06:02:45 --> ErrorException: Undefined array key "icon"
+[Method: GET, Route: admin]
+in APPPATH/Views/admin/layout.php on line 42.
+ 1 APPPATH/Views/admin/layout.php(42): CodeIgniter\Debug\Exceptions->errorHandler()
+ 2 SYSTEMPATH/View/View.php(240): include('/opt/lampp/htdocs/Operateur-mobile/app/Views/admin/layout.php')
+>>>>>>> origin/main
  3 SYSTEMPATH/View/View.php(243): CodeIgniter\View\View->CodeIgniter\View\{closure}()
  4 SYSTEMPATH/Common.php(1250): CodeIgniter\View\View->render()
  5 APPPATH/Controllers/Admin/BaseAdminController.php(18): view()
@@ -412,12 +447,21 @@ in APPPATH/Views/admin/layout.php on line 42.
 10 SYSTEMPATH/Boot.php(417): CodeIgniter\CodeIgniter->run()
 11 SYSTEMPATH/Boot.php(68): CodeIgniter\Boot::runCodeIgniter()
 12 FCPATH/index.php(59): CodeIgniter\Boot::bootWeb()
+<<<<<<< HEAD
 13 SYSTEMPATH/rewrite.php(44): require_once('/home/alexia-reyas/Documents/Operateur-mobile/public/index.php')
 CRITICAL - 2026-07-21 05:53:23 --> ErrorException: Undefined array key "icon"
 [Method: GET, Route: admin]
 in APPPATH/Views/admin/layout.php on line 42.
  1 APPPATH/Views/admin/layout.php(42): CodeIgniter\Debug\Exceptions->errorHandler()
  2 SYSTEMPATH/View/View.php(240): include('/home/alexia-reyas/Documents/Operateur-mobile/app/Views/admin/layout.php')
+=======
+13 SYSTEMPATH/rewrite.php(44): require_once('/opt/lampp/htdocs/Operateur-mobile/public/index.php')
+CRITICAL - 2026-07-21 06:03:16 --> ErrorException: Undefined array key "icon"
+[Method: GET, Route: admin]
+in APPPATH/Views/admin/layout.php on line 42.
+ 1 APPPATH/Views/admin/layout.php(42): CodeIgniter\Debug\Exceptions->errorHandler()
+ 2 SYSTEMPATH/View/View.php(240): include('/opt/lampp/htdocs/Operateur-mobile/app/Views/admin/layout.php')
+>>>>>>> origin/main
  3 SYSTEMPATH/View/View.php(243): CodeIgniter\View\View->CodeIgniter\View\{closure}()
  4 SYSTEMPATH/Common.php(1250): CodeIgniter\View\View->render()
  5 APPPATH/Controllers/Admin/BaseAdminController.php(18): view()
@@ -428,12 +472,21 @@ in APPPATH/Views/admin/layout.php on line 42.
 10 SYSTEMPATH/Boot.php(417): CodeIgniter\CodeIgniter->run()
 11 SYSTEMPATH/Boot.php(68): CodeIgniter\Boot::runCodeIgniter()
 12 FCPATH/index.php(59): CodeIgniter\Boot::bootWeb()
+<<<<<<< HEAD
 13 SYSTEMPATH/rewrite.php(44): require_once('/home/alexia-reyas/Documents/Operateur-mobile/public/index.php')
 CRITICAL - 2026-07-21 05:53:29 --> ErrorException: Undefined array key "icon"
 [Method: GET, Route: admin]
 in APPPATH/Views/admin/layout.php on line 42.
  1 APPPATH/Views/admin/layout.php(42): CodeIgniter\Debug\Exceptions->errorHandler()
  2 SYSTEMPATH/View/View.php(240): include('/home/alexia-reyas/Documents/Operateur-mobile/app/Views/admin/layout.php')
+=======
+13 SYSTEMPATH/rewrite.php(44): require_once('/opt/lampp/htdocs/Operateur-mobile/public/index.php')
+CRITICAL - 2026-07-21 06:04:58 --> ErrorException: Undefined array key "icon"
+[Method: GET, Route: admin]
+in APPPATH/Views/admin/layout.php on line 42.
+ 1 APPPATH/Views/admin/layout.php(42): CodeIgniter\Debug\Exceptions->errorHandler()
+ 2 SYSTEMPATH/View/View.php(240): include('/opt/lampp/htdocs/Operateur-mobile/app/Views/admin/layout.php')
+>>>>>>> origin/main
  3 SYSTEMPATH/View/View.php(243): CodeIgniter\View\View->CodeIgniter\View\{closure}()
  4 SYSTEMPATH/Common.php(1250): CodeIgniter\View\View->render()
  5 APPPATH/Controllers/Admin/BaseAdminController.php(18): view()
@@ -444,6 +497,7 @@ in APPPATH/Views/admin/layout.php on line 42.
 10 SYSTEMPATH/Boot.php(417): CodeIgniter\CodeIgniter->run()
 11 SYSTEMPATH/Boot.php(68): CodeIgniter\Boot::runCodeIgniter()
 12 FCPATH/index.php(59): CodeIgniter\Boot::bootWeb()
+<<<<<<< HEAD
 13 SYSTEMPATH/rewrite.php(44): require_once('/home/alexia-reyas/Documents/Operateur-mobile/public/index.php')
 CRITICAL - 2026-07-21 05:53:53 --> ErrorException: Undefined array key "icon"
 [Method: GET, Route: admin]
@@ -557,3 +611,6 @@ in APPPATH/Views/admin/layout.php on line 42.
 11 SYSTEMPATH/Boot.php(68): CodeIgniter\Boot::runCodeIgniter()
 12 FCPATH/index.php(59): CodeIgniter\Boot::bootWeb()
 13 SYSTEMPATH/rewrite.php(44): require_once('/home/alexia-reyas/Documents/Operateur-mobile/public/index.php')
+=======
+13 SYSTEMPATH/rewrite.php(44): require_once('/opt/lampp/htdocs/Operateur-mobile/public/index.php')
+>>>>>>> origin/main

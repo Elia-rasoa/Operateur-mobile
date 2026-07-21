@@ -2,7 +2,6 @@
     <a href="/admin/clients" class="text-decoration-none fw-semibold" style="color:#4361ee;">← Retour à la liste des clients</a>
 </div>
 
-<!-- Infos client -->
 <div class="card shadow-sm border-0 rounded-3 p-4 mb-4">
     <div class="row g-4">
         <div class="col-md-4">
@@ -15,8 +14,8 @@
         </div>
         <div class="col-md-4">
             <div class="small text-muted text-uppercase fw-semibold" style="letter-spacing:0.5px;">Solde actuel</div>
-            <div class="h5 fw-bold mt-1" style="color: <?= $client['solde'] >= 0 ? '#16a34a' : '#dc3545' ?>;">
-                <?= number_format($client['solde'], 0, ',', ' ') ?> FCFA
+            <div class="h5 fw-bold mt-1" style="color: <?= ($client['solde'] ?? 0) >= 0 ? '#16a34a' : '#dc3545' ?>;">
+                <?= number_format($client['solde'] ?? 0, 0, ',', ' ') ?> FCFA
             </div>
         </div>
     </div>
@@ -42,7 +41,7 @@
                     <td>#<?= esc($t['id']) ?></td>
                     <td class="text-muted small"><?= esc(date('d/m/Y H:i', strtotime($t['date_transaction']))) ?></td>
                     <td>
-                        <span class="badge badge-<?= esc($t['type_nom'] ?? '') ?>">
+                        <span class="badge bg-<?= (($t['type_nom'] ?? '') === 'depot') ? 'success' : ((($t['type_nom'] ?? '') === 'retrait') ? 'danger' : 'primary') ?>">
                             <?= esc(ucfirst($t['type_nom'] ?? 'N/A')) ?>
                         </span>
                     </td>
@@ -54,4 +53,7 @@
         </tbody>
     </table>
 </div>
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin/main
