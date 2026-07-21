@@ -39,7 +39,6 @@ $title = $title ?? 'Administration';
         <nav class="sidebar-nav">
             <?php foreach ($sidebarItems as $key => $item): ?>
                 <a href="<?= $item['route'] ?>" class="nav-link <?= $isActive($item['route']) ?>">
-                    <span class="icon"><?= $item['icon'] ?></span>
                     <?= $item['label'] ?>
                 </a>
             <?php endforeach; ?>

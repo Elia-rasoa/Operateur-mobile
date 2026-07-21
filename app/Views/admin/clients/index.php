@@ -1,31 +1,20 @@
 <!-- Stats -->
 <?php
-    $total_clients = count($clients);
-    $solde_total = array_sum(array_column($clients, 'solde'));
+    $totalClients = count($clients);
+    $soldeTotal = array_sum(array_column($clients, 'solde'));
 ?>
-<<<<<<< HEAD
-<div class="stats-grid">
-    <div class="stat-card">
-        <div class="stat-label">Total clients</div>
-        <div class="stat-value"><?= esc($total_clients) ?></div>
-    </div>
-    <div class="stat-card">
-        <div class="stat-label">Solde total</div>
-        <div class="stat-value" style="color:#4361ee;"><?= number_format($solde_total, 0, ',', ' ') ?> FCFA</div>
-=======
 <div class="row g-3 mb-4">
     <div class="col-md-6">
         <div class="stat-card">
             <div class="stat-label">Total clients</div>
-            <div class="stat-value"><?= $total_clients ?></div>
+            <div class="stat-value"><?= esc($totalClients) ?></div>
         </div>
     </div>
     <div class="col-md-6">
         <div class="stat-card">
             <div class="stat-label">Solde total</div>
-            <div class="stat-value" style="color:#4361ee;"><?= number_format($solde_total, 0, ',', ' ') ?> FCFA</div>
+            <div class="stat-value" style="color:#4361ee;"><?= number_format($soldeTotal, 0, ',', ' ') ?> FCFA</div>
         </div>
->>>>>>> cfd43bd (front admin)
     </div>
 </div>
 
@@ -49,8 +38,8 @@
                     <td>#<?= esc($c['id']) ?></td>
                     <td><a href="/admin/clients/historique/<?= esc($c['id']) ?>" class="fw-semibold text-decoration-none" style="color:#4361ee;"><?= esc($c['numero_telephone'] ?? '-') ?></a></td>
                     <td><?= esc($c['nom'] ?? '-') ?></td>
-                    <td class="text-end <?= $c['solde'] >= 0 ? 'solde-positif' : 'solde-negatif' ?>">
-                        <?= number_format($c['solde'], 0, ',', ' ') ?> FCFA
+                    <td class="text-end <?= ($c['solde'] ?? 0) >= 0 ? 'solde-positif' : 'solde-negatif' ?>">
+                        <?= number_format($c['solde'] ?? 0, 0, ',', ' ') ?> FCFA
                     </td>
                     <td class="text-end">
                         <a href="/admin/clients/historique/<?= esc($c['id']) ?>" class="btn btn-primary btn-sm">📋 Historique</a>
