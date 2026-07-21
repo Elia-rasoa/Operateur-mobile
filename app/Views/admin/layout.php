@@ -2,13 +2,13 @@
 // Vars par défaut
 $currentRoute = service('uri')->getPath();
 $sidebarItems = [
-    'dashboard' => ['label' => 'Tableau de bord', 'icon' => '📊', 'route' => '/admin'],
-    'transactions' => ['label' => 'Transactions', 'icon' => '📈', 'route' => '/admin/transactions'],
-    'clients' => ['label' => 'Clients', 'icon' => '👥', 'route' => '/admin/clients'],
-    'baremes' => ['label' => 'Barèmes', 'icon' => '📋', 'route' => '/admin/baremes'],
-    'prefixes' => ['label' => 'Préfixes & Opérateurs', 'icon' => '📞', 'route' => '/admin/prefixes'],
-    'gains' => ['label' => 'Gains', 'icon' => '💰', 'route' => '/admin/gains'],
-    'reversement' => ['label' => 'Reversements', 'icon' => '🔄', 'route' => '/admin/reversement'],
+    'dashboard' => ['label' => 'Tableau de bord', 'route' => '/admin'],
+    'transactions' => ['label' => 'Transactions', 'route' => '/admin/transactions'],
+    'clients' => ['label' => 'Clients', 'route' => '/admin/clients'],
+    'baremes' => ['label' => 'Barèmes', 'route' => '/admin/baremes'],
+    'prefixes' => ['label' => 'Préfixes & Opérateurs', 'route' => '/admin/prefixes'],
+    'gains' => ['label' => 'Gains', 'route' => '/admin/gains'],
+    'reversement' => ['label' => 'Reversements', 'route' => '/admin/reversement'],
 ];
 $isActive = function($route) use ($currentRoute) {
     return strpos($currentRoute, $route) === 0 ? 'active' : '';
@@ -34,7 +34,7 @@ $title = $title ?? 'Administration';
     <!-- SIDEBAR -->
     <aside class="sidebar" id="sidebar">
         <div class="sidebar-logo">
-            <span class="badge bg-primary">📱</span> Mobile Money
+            <span class="badge bg-primary"></span> Mobile Money
         </div>
         <nav class="sidebar-nav">
             <?php foreach ($sidebarItems as $key => $item): ?>
